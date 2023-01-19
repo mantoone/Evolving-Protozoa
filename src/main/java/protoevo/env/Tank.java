@@ -194,9 +194,46 @@ public class Tank implements Iterable<Cell>, Serializable
 		flushWrites();
 
 		Collection<Cell> cells = chunkManager.getAllCells();
+		Collection<Protozoan> protozoans = chunkManager.getAllProtozoans();
+		Collection<PlantCell> plantCells = chunkManager.getAllPlantCells();
 
 		cells.parallelStream().forEach(Cell::resetPhysics);
-		cells.parallelStream().forEach(cell -> updateCell(cell, delta));
+
+		//cells.parallelStream().forEach(cell -> updateCell(cell, delta));
+		// Data oriented update cell
+
+		cells.parallelStream().forEach(cell -> cell.handleInteractions(delta));
+
+		//cells.parallelStream().forEach(cell -> cell.update(delta));
+
+
+		cells.parallelStream().forEach(cell -> cell.updateTimeAlive(delta));
+		cells.parallelStream().forEach(cell -> cell.digest(delta));
+		cells.parallelStream().forEach(cell -> cell.repair(delta));
+		cells.parallelStream().forEach(cell -> cell.resourceProduction(delta));
+		cells.parallelStream().forEach(cell -> cell.progressConstructionProjects(delta));
+		cells.parallelStream().forEach(cell -> cell.updateCellBindings(delta));
+
+		//cells.parallelStream().forEach(cell -> cell.update(delta));
+
+		cells.parallelStream().forEach(cell -> handleTankEdge(cell));
+
+		// Protozoan updates
+		protozoans.parallelStream().forEach(pro -> pro.age(delta));
+		protozoans.parallelStream().forEach(pro -> pro.checkIfDead());
+		protozoans.parallelStream().forEach(pro -> pro.think(delta));
+		protozoans.parallelStream().forEach(pro -> pro.updateSpikes(delta));
+		protozoans.parallelStream().forEach(pro -> pro.updateContactSensors(delta));
+		protozoans.parallelStream().forEach(pro -> pro.maintainRetina(delta));
+
+		// Plant cell updates
+		plantCells.parallelStream().forEach(plantCell -> plantCell.updateCrowdingFactor());
+		plantCells.parallelStream().forEach(plantCell -> plantCell.updateHealth(delta));
+		plantCells.parallelStream().forEach(plantCell -> plantCell.addConstructionMass(delta));
+		plantCells.parallelStream().forEach(plantCell -> plantCell.addAvailableEnergy(delta / 3f));
+		plantCells.parallelStream().forEach(plantCell -> plantCell.checkForSplit());
+
+
 		cells.parallelStream().forEach(cell -> cell.physicsUpdate(delta));
 		cells.parallelStream().forEach(this::handleDeadEntities);
 

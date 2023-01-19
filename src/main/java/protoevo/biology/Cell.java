@@ -53,6 +53,10 @@ public abstract class Cell extends Particle implements Serializable
 		camProductionRates = new HashMap<>(0);
 		availableComplexMolecules = new HashMap<>(0);
 	}
+
+	public void updateTimeAlive(float delta){
+		timeAlive += delta;
+	}
 	
 	public void update(float delta) {
 
@@ -62,6 +66,16 @@ public abstract class Cell extends Particle implements Serializable
 		resourceProduction(delta);
 		progressConstructionProjects(delta);
 
+		if (!toAttach.isEmpty()) {
+			cellBindings.addAll(toAttach);
+			toAttach.clear();
+		}
+		cellBindings.removeIf(this::detachCondition);
+		for (CellAdhesion.CellBinding binding : cellBindings)
+			handleBindingInteraction(binding, delta);
+	}
+
+	public void updateCellBindings(float delta) {
 		if (!toAttach.isEmpty()) {
 			cellBindings.addAll(toAttach);
 			toAttach.clear();

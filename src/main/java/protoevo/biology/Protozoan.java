@@ -391,7 +391,22 @@ public class Protozoan extends Cell
 		maintainRetina(delta);
 	}
 
-	private void maintainRetina(float delta) {
+	public void checkIfDead(){
+		if (isDead())
+			handleDeath();
+	}
+
+	public void updateSpikes(float delta){
+		for (Spike spike : spikes)
+			spike.update(delta);
+	}
+
+	public void updateContactSensors(float delta){
+		for (ContactSensor contactSensor : contactSensors)
+			contactSensor.reset();
+	}
+
+	public void maintainRetina(float delta) {
 		float availableRetinal = getComplexMoleculeAvailable(Food.ComplexMolecule.Retinal);
 		float usedRetinal = retina.updateHealth(delta, availableRetinal);
 		depleteComplexMolecule(Food.ComplexMolecule.Retinal, usedRetinal);

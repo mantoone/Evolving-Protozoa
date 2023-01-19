@@ -2,6 +2,8 @@ package protoevo.core;
 
 import protoevo.biology.Cell;
 import com.google.common.collect.Iterators;
+import protoevo.biology.PlantCell;
+import protoevo.biology.Protozoan;
 import protoevo.env.Rock;
 import protoevo.utils.Vector2;
 
@@ -11,6 +13,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class ChunkManager implements Serializable {
 
@@ -24,6 +27,8 @@ public class ChunkManager implements Serializable {
 
     private final Chunk[] chunks;
     private final List<Cell> entities = new ArrayList<>();
+    private final List<Protozoan> protozoans = new ArrayList<>();
+    private final List<PlantCell> plantCells = new ArrayList<>();
 
     public ChunkManager(float xMin, float xMax,
                         float yMin, float yMax,
@@ -135,6 +140,12 @@ public class ChunkManager implements Serializable {
     }
 
     public void add(Cell e) {
+        if (e instanceof Protozoan){
+            protozoans.add((Protozoan) e);
+        }
+        if (e instanceof PlantCell){
+            plantCells.add((PlantCell) e);
+        }
         if (e != null)
             entities.add(e);
     }
@@ -147,12 +158,24 @@ public class ChunkManager implements Serializable {
         return entities;
     }
 
+    public Collection<Protozoan> getAllProtozoans() {
+        return protozoans;
+    }
+
+    public Collection<PlantCell> getAllPlantCells() {
+        return plantCells.stream().filter(plantCell -> !plantCell.isDead()).collect(Collectors.toList());
+    }
+
+
     public void update() {
         for (Chunk chunk : chunks)
             chunk.clear();
 
         entities.removeIf(Cell::isDead);
         entities.forEach(this::allocateToChunk);
+
+        protozoans.removeIf(Protozoan::isDead);
+        plantCells.removeIf(PlantCell::isDead);
     }
 
     public float getChunkSize() {

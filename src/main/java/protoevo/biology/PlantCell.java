@@ -95,6 +95,23 @@ public class PlantCell extends EdibleCell {
             burst(PlantCell.class, r -> new PlantCell(r, getTank()));
     }
 
+    public void checkForSplit(){
+        if (shouldSplit())
+            burst(PlantCell.class, r -> new PlantCell(r, getTank()));
+    }
+
+    public void updateHealth(float delta){
+        if (getGrowthRate() < 0f)
+            setHealth(getHealth() + Settings.plantRegen * delta * getGrowthRate());
+    }
+
+    public void updateCrowdingFactor(){
+        crowdingFactor = 0;
+        ChunkManager chunkManager = getTank().getChunkManager();
+        Iterator<Cell> entities = chunkManager.broadEntityDetection(getPos(), getRadius());
+        entities.forEachRemaining(this::updateCrowding);
+    }
+
     /**
      * <a href="https://www.desmos.com/calculator/hmhjwdk0jc">Desmos Graph</a>
      * @return The growth rate based on the crowding and current radius.
