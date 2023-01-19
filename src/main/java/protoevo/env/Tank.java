@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import protoevo.biology.*;
 import protoevo.biology.genes.Gene;
@@ -197,11 +198,13 @@ public class Tank implements Iterable<Cell>, Serializable
 		Collection<Protozoan> protozoans = chunkManager.getAllProtozoans();
 		Collection<PlantCell> plantCells = chunkManager.getAllPlantCells();
 
-		cells.parallelStream().forEach(Cell::resetPhysics);
+		Stream<Cell> stream = cells.parallelStream();
 
+		stream.forEach(Cell::resetPhysics);
+
+		// Original cell update
 		//cells.parallelStream().forEach(cell -> updateCell(cell, delta));
 		// Data oriented update cell
-
 		cells.parallelStream().forEach(cell -> cell.handleInteractions(delta));
 
 		//cells.parallelStream().forEach(cell -> cell.update(delta));
@@ -232,8 +235,6 @@ public class Tank implements Iterable<Cell>, Serializable
 		plantCells.parallelStream().forEach(plantCell -> plantCell.addConstructionMass(delta));
 		plantCells.parallelStream().forEach(plantCell -> plantCell.addAvailableEnergy(delta / 3f));
 		plantCells.parallelStream().forEach(plantCell -> plantCell.checkForSplit());
-
-
 		cells.parallelStream().forEach(cell -> cell.physicsUpdate(delta));
 		cells.parallelStream().forEach(this::handleDeadEntities);
 
