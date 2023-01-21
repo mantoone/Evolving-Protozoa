@@ -175,6 +175,12 @@ public class Simulation
 				System.out.println();
 				System.out.println("Finished simulation. All protozoa died.");
 				printStats();
+
+				// Restart simulation
+				newDefaultTank();
+				setupTank();
+				makeHistorySnapshot();
+				simulate = true;
 			}
 		}
 	}
