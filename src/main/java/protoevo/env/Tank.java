@@ -198,10 +198,16 @@ public class Tank implements Iterable<Cell>, Serializable
 		Collection<Protozoan> protozoans = chunkManager.getAllProtozoans();
 		Collection<PlantCell> plantCells = chunkManager.getAllPlantCells();
 
-		Stream<Cell> stream = cells.parallelStream();
+		cells.parallelStream().forEach(cell -> {
+			cell.resetPhysics();
+			updateCell(cell, delta);
+			cell.physicsUpdate(delta);
+			this.handleDeadEntities(cell);
+		});
+		//cells.parallelStream().forEach(this::handleDeadEntities);
 
-		stream.forEach(Cell::resetPhysics);
-
+		/*
+		cells.parallelStream().forEach(Cell::resetPhysics);
 		// Original cell update
 		//cells.parallelStream().forEach(cell -> updateCell(cell, delta));
 		// Data oriented update cell
@@ -237,6 +243,7 @@ public class Tank implements Iterable<Cell>, Serializable
 		plantCells.parallelStream().forEach(plantCell -> plantCell.checkForSplit());
 		cells.parallelStream().forEach(cell -> cell.physicsUpdate(delta));
 		cells.parallelStream().forEach(this::handleDeadEntities);
+		*/
 
 		updateCounts(cells);
 		if (chemicalSolution != null)
