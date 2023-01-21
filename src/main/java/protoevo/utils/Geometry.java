@@ -2,6 +2,7 @@ package protoevo.utils;
 
 public class Geometry {
 
+    public static double sphereVolumeMultiplier = (4 / 3) * Math.PI;
     public static float[] circleIntersectLineCoefficients(Vector2 dir, Vector2 x, float r) {
         float a = dir.len2();
         float b = -2*dir.dot(x);
@@ -36,6 +37,6 @@ public class Geometry {
     }
 
     public static float getSphereVolume(float r) {
-        return  (float) ((4 / 3) * Math.PI * r * r * r);
+        return  (float) (sphereVolumeMultiplier * r * r * r);
     }
 }
