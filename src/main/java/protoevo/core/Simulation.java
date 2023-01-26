@@ -37,6 +37,9 @@ public class Simulation
 	private final String genomeFile, historyFile;
 	private List<String> statsNames;
 
+	private double updateDurations;
+	private int updatesSincePrint;
+
 	public Simulation()
 	{
 		simulate = true;
@@ -48,6 +51,8 @@ public class Simulation
 		newSaveDir();
 		newDefaultTank();
 		loadSettings();
+		updateDurations = 0;
+		updatesSincePrint = 0;
 		RANDOM = new Random(Settings.simulationSeed);
 	}
 
@@ -190,6 +195,12 @@ public class Simulation
 				System.out.println();
 				System.out.println("Finished simulation. All protozoa died.");
 				printStats();
+
+				// Restart simulation
+				newDefaultTank();
+				setupTank();
+				makeHistorySnapshot();
+				simulate = true;
 			}
 		}
 	}
@@ -203,9 +214,13 @@ public class Simulation
 	public void update()
 	{
 		float delta = timeDilation * Settings.simulationUpdateDelta;
+
+		long startTime = System.nanoTime();
 		synchronized (tank) {
 			tank.update(delta);
 		}
+
+
 
 		timeSinceSave += delta;
 		if (timeSinceSave > Settings.timeBetweenSaves) {
@@ -217,6 +232,19 @@ public class Simulation
 		if (timeSinceSnapshot > Settings.historySnapshotTime) {
 			timeSinceSnapshot = 0;
 			makeHistorySnapshot();
+		}
+
+		long endTime = System.nanoTime();
+
+		updateDurations += (endTime - startTime) / 1e6;
+		updatesSincePrint++;
+
+		if (updateDurations > 10000f){
+			double duration = updateDurations / updatesSincePrint;
+			System.out.println("Update duration: " + Math.round(duration * 100.0) / 100.0 + " ms. Updates: " + updatesSincePrint);
+
+			updatesSincePrint = 0;
+			updateDurations = 0;
 		}
 	}
 
@@ -272,6 +300,7 @@ public class Simulation
 	public void setTimeDilation(float td) { timeDilation = td; }
 
 	public void setUpdateDelay(float updateDelay) {
+		System.out.println("Updatedelay: " + updateDelay);
 		this.updateDelay = updateDelay;
 	}
 
